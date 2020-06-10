@@ -1,0 +1,57 @@
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const bCrypt = require('bcrypt-nodejs');
+
+/**
+ * Define user model
+ */
+const userSchema = new Schema({
+    email: {type: String, unique: true, lowercase: true},
+    password: String
+})
+
+/**
+ * On Save Hook, encrypt password
+ */
+userSchema.pre('save', function (next) {
+    const user = this;
+
+    bCrypt.genSalt(10, function (err, salt) {
+        if (err) {
+            return next(err)
+        }
+
+        bCrypt.hash(user.password, salt, null, function (err, hash) {
+            if (err) {
+                return next(err)
+            }
+            user.password = hash;
+            next()
+        })
+    })
+})
+
+/**
+ * compare hashed passwords
+ */
+userSchema.methods.comparePassword = function (candidatePassword, callback) {
+    bCrypt.compare(candidatePassword, this.password, function (err, isMatch) {
+        if (err) {
+            return callback(err)
+        }
+
+        callback(null, isMatch)
+    })
+}
+
+
+/**
+ * Model class - creates new users
+ */
+const ModelClass = mongoose.model('user', userSchema);
+
+
+/**
+ * Export user model
+ */
+module.exports = ModelClass;
