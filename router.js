@@ -11,4 +11,8 @@ module.exports = function (app) {
     });
     app.post('/signin', requireSignin, Authentication.signin);
     app.post('/signup', Authentication.signup);
+        app.get('/test', function (req, res, next) {
+        res.send(['XXX', 'ZZZ', '777', '... test response data from: router.js']);
+        console.log('req.body:', req.body);
+    })
 }
